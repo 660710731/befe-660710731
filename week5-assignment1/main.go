@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,15 +20,14 @@ var todolists = []Todo{
 }
 
 func getTodos(c *gin.Context) {
-	doneQuery := c.Query("done")
-	titleQuery := c.Query("title")
+	doneQuery := strings.TrimSpace(c.Query("done"))
+	titleQuery := strings.TrimSpace(c.Query("title"))
 
 	filtered := []Todo{}
 
 	for _, todo := range todolists {
 		match := true
 
-		// กรองตาม done
 		if doneQuery != "" {
 			if doneQuery == "true" && !todo.Done {
 				match = false
@@ -37,7 +37,6 @@ func getTodos(c *gin.Context) {
 			}
 		}
 
-		// กรองตาม title (แบบตรงตัว)
 		if titleQuery != "" && todo.Title != titleQuery {
 			match = false
 		}
@@ -63,7 +62,7 @@ func addTodo(c *gin.Context) {
 		return
 	}
 
-	doneQuery := c.Query("done")
+	doneQuery := strings.TrimSpace(c.Query("done"))
 
 	if doneQuery != "" {
 		if doneQuery == "true" && !newTodo.Done {
@@ -87,8 +86,8 @@ func main() {
 
 	api := r.Group("/api/v1")
 	{
-		api.GET("/todolists", getTodos) // แสดง todo ทั้งหมด
-		api.POST("/todolists", addTodo) // เพิ่ม todo ใหม่
+		api.GET("/todolists", getTodos)
+		api.POST("/todolists", addTodo)
 	}
 
 	r.Run(":8080")
